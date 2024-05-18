@@ -44,14 +44,14 @@ One of the key motivations behind this project is to ensure the privacy and secu
     - On macOS/Linux:
 
         ```bash
-        python3 -m venv venv
+        python -m venv venv
         source venv/bin/activate
         ```
 
 3. **Install dependencies:**
 
     ```bash
-    pip3 install -r requirements.txt
+    pip install -r requirements.txt
     ```
 
 4. **Set up environment variables:**
@@ -65,7 +65,7 @@ One of the key motivations behind this project is to ensure the privacy and secu
 5. **Run the application:**
 
     ```bash
-    python3 app.py
+    python app.py
     ```
 
 6. **Open the application in your browser:**

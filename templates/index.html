@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with GPT</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            width: 90%;
+            height: 90%;
+            max-width: 800px;
+            border-radius: 15px;
+            background: #fff;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        #header {
+            background: #0078d7;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.5em;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        #messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .message {
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+            line-height: 1.4;
+            font-size: 15px;
+            position: relative;
+            margin-bottom: 25px;
+        }
+        .message-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #999;
+            position: absolute;
+            bottom: -20px;
+        }
+        .user-message {
+            background: #0078d7;
+            color: white;
+            align-self: flex-end;
+        }
+        .user-message .message-label {
+            right: 0;
+        }
+        .gpt-message {
+            background: #f0f2f5;
+            color: #333;
+            align-self: flex-start;
+        }
+        .gpt-message .message-label {
+            left: 0;
+        }
+        #input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 20px;
+            background: #fff;
+            border-top: 1px solid #e5e5e5;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+        #input-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #prompt-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        #prompt {
+            flex: 1;
+            padding: 10px 15px;
+            border-radius: 25px;
+            border: 1px solid #e5e5e5;
+            font-family: inherit;
+            font-size: 15px;
+            resize: none;
+            line-height: 1.4;
+            overflow-y: auto;
+            min-height: 20px;
+            max-height: 150px;
+        }
+        #prompt:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #0078d7;
+        }
+        #new-line-message {
+            position: absolute;
+            bottom: 5px;
+            right: 15px;
+            font-size: 12px;
+            color: #999;
+            pointer-events: none;
+        }
+        #send-button {
+            background: #0078d7;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #send-button:hover {
+            background: #005a9e;
+        }
+        #send-button svg {
+            fill: white;
+            width: 20px;
+            height: 20px;
+        }
+        #model-select {
+            margin-left: 10px;
+            border-radius: 25px;
+            padding: 10px 15px;
+            border: 1px solid #e5e5e5;
+            font-family: inherit;
+            font-size: 14px;
+            appearance: none;
+            background: white url("data:image/svg+xml;utf8,<svg viewBox='0 0 12 8' width='12' height='8' xmlns='http://www.w3.org/2000/svg'><path d='M10.9,1.4L6,6.3L1.1,1.4C0.9,1.2,0.6,1.2,0.4,1.4C0.2,1.6,0.2,1.9,0.4,2.1l5.2,5.2c0.2,0.2,0.5,0.2,0.7,0l5.2-5.2c0.2-0.2,0.2-0.5,0-0.7C11.4,1.2,11.1,1.2,10.9,1.4z' fill='%23333333'/></svg>") no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
+
+        #clear-context-button {
+            background: #e5e5e5;
+            color: #333;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 15px;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+            align-self: flex-end;
+            margin:auto;
+        }
+        #clear-context-button:hover {
+            background: #d5d5d5;
+        }
+        #about{
+            color: #4d4d4d;
+            padding-top: 1vh;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="header">Chat with GPT</div>
+        <div id="messages"></div>
+        <div id="input-container">
+            <div id="input-row">
+                <div id="prompt-container">
+                    <textarea  id="prompt" rows="1" placeholder="Type your message..." oninput="autoResize(this)" data-gramm_editor="false"></textarea>
+                    <div id="new-line-message">use shift + return for new line</div>
+                </div>
+                <button id="send-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+                <select id="model-select">
+                    <option value="gpt-4o">GPT-4o</option>
+                    <option value="gpt-4">GPT-4</option>
+                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                </select>
+            </div>
+            <button id="clear-context-button">Clear Context</button>
+        </div>
+    </div>
+    <div id="about">
+        Created by 🙂 E. LeBlanc, 🤖 ChatGPT 4o, and 🤖 Claude 3.
+    </div>
+
+    <script>
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        const sendButton = document.getElementById('send-button');
+        const textarea = document.getElementById('prompt');
+        const modelSelect = document.getElementById('model-select');
+        const messagesContainer = document.getElementById('messages');
+        const clearContextButton = document.getElementById('clear-context-button');
+
+        let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
+
+        async function sendMessage() {
+            const userInput = textarea.value.trim();
+            const modelName = modelSelect.value;
+
+            if (!userInput) return;
+
+            addMessage(userInput, 'user-message', 'You');
+            textarea.value = '';
+            autoResize(textarea);
+
+            const response = await fetch('/stream-gpt-model', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    prompt: userInput,
+                    model: modelName,
+                    conversationHistory: conversationHistory,
+                }),
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let gptResponse = '';
+            let messageElement = null;
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value);
+                gptResponse += chunk;
+
+                if (!messageElement) {
+                    messageElement = createMessageElement(gptResponse, 'gpt-message', `GPT (${modelName})`);
+                    messagesContainer.appendChild(messageElement);
+                } else {
+                    updateMessageContent(messageElement, gptResponse);
+                }
+
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            conversationHistory.push({"role": "user", "content": userInput});
+            conversationHistory.push({"role": "assistant", "content": gptResponse});
+            localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+        }
+
+        function createMessageElement(content, className, label) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${className}`;
+            messageElement.innerHTML = marked.parse(content);
+
+            const labelElement = document.createElement('div');
+            labelElement.className = 'message-label';
+            labelElement.textContent = label;
+
+            messageElement.appendChild(labelElement);
+            return messageElement;
+        }
+
+        function updateMessageContent(messageElement, content) {
+            const contentElement = messageElement.firstChild;
+            contentElement.innerHTML = marked.parse(content);
+        }
+
+        function addMessage(content, className, label) {
+            const messageElement = createMessageElement(content, className, label);
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function clearConversationHistory() {
+            conversationHistory = [];
+            localStorage.removeItem('conversationHistory');
+            messagesContainer.innerHTML = '';
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        textarea.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+        clearContextButton.addEventListener('click', clearConversationHistory);
+    </script>
+</body>
+</html>

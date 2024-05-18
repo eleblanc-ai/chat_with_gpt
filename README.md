@@ -6,7 +6,7 @@ This project is a web application that allows users to interact with OpenAI's GP
 
 ### Motivation
 
-One of the key motivations behind this project is to ensure the privacy and security of user data. By utilizing function calling, the data inputted by users is not used for training purposes by OpenAI. This approach allows users to interact with the models while ensuring that their data remains private and secure, adhering to best practices for data protection and user confidentiality.
+One of the key motivations behind this project is to ensure the privacy and security of user data. By utilizing the API, the data inputted by users is not used for training purposes by OpenAI. This approach allows users to interact with the models while ensuring that their data remains private and secure, adhering to best practices for data protection and user confidentiality.
 
 ## Features
 
